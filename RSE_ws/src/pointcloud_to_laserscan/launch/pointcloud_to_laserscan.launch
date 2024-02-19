@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- Pointcloud to Laserscan Node -->
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan_node" output="screen" >
+    <remap from="cloud_in" to="/steer_bot/points" />
+    <remap from="scan" to="/steer_bot/scan" />
+
+  </node>
+</launch>

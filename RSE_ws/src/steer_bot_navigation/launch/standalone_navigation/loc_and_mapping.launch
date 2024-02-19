@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <!-- Run the map server -->
+  <arg name="map_file" default="$(find steer_bot_navigation)/maps/map_city.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!--- Run AMCL -->
+  <include file="$(find steer_bot_navigation)/launch/standalone_navigation/amcl.launch" />
+
+  <!--- Run Move Base -->
+  <include file="$(find steer_bot_navigation)/launch/standalone_navigation/move_base.launch" />
+
+</launch>

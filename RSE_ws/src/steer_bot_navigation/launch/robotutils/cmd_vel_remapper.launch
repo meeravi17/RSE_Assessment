@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="steer_bot_navigation" type="steer_bot_remapper" name="steer_bot_remapper_node" output="screen">
+		<rosparam file="$(find steer_bot_navigation)/launch/robotutils/mapper.yaml" command="load"/>
+  </node>
+</launch>
