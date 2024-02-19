@@ -1,58 +1,97 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="model" default="$(find mybot_pkg)/urdf/my_bot.urdf"/>
-    <arg name="namespace" default="/steer_bot" />
-    <arg name="world_name" default="$(find mybot_pkg)/worlds/city.world" />
-    <arg name="cmd_timeout" default="0.5"/>
-    <arg name="x" default="0.0"/>
-    <arg name="y" default="0.0"/>
-    <arg name="z" default="1.0" />
-    <arg name="roll" default="0.0"/>
-    <arg name="pitch" default="0.0"/>
-    <arg name="yaw" default="0.0"/>
+  <!-- These are the arguments you can pass to this launch file, for example, paused:=true -->
+  <arg name="model" default="$(find mybot_pkg)/urdf/my_bot.urdf"/>
+  <arg name="namespace" default="/steer_bot" />
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="1.0" />
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0.0"/>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="extra_gazebo_args" default=""/>
+  <arg name="gui" default="true"/>
+  <arg name="cmd_timeout" default="0.5"/>
 
-    <group ns="$(arg namespace)">
 
-        <!-- Gazebo  -->
-        <include file="$(find gazebo_ros)/launch/empty_world.launch">
-            <arg name="world_name" default="$(arg world_name)"/>
-        </include>
+  <group ns="$(arg namespace)">
 
-        <!-- Load the robot description -->
-        <param name="robot_description" command="xacro $(arg model)"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="physics" default="ode"/>
+    <arg name="verbose" default="false"/>
+    <arg name="output" default="screen"/>
+    <!-- <arg name="world_name" default="$(find mybot_pkg)/worlds/city.world"/>  -->
+    <arg name="respawn_gazebo" default="false"/>
+    <arg name="use_clock_frequency" default="false"/>
+    <arg name="pub_clock_frequency" default="100"/>
+    <arg name="enable_ros_network" default="true" />
+    <arg name="server_required" default="false"/>
+    <arg name="gui_required" default="false"/>
+    <arg name="recording" default="false"/>
 
-        <!-- Load ros_controllers configuration parameters -->
-        <rosparam file="$(find steer_bot_control)/config/ctrl_ackermann_steering_controller.yaml" command="load" ns="$(arg namespace)" />
-        <rosparam file="$(find steer_bot_control)/config/ctrl_gains.yaml" command="load" ns="$(arg namespace)" />
-        <rosparam file="$(find steer_bot_control)/config/ctrl_joint_state_publisher.yaml" command="load" ns="$(arg namespace)" />
-        <rosparam file="$(find steer_bot_control)/config/ctrl_steer_bot_hardware_gazebo.yaml" command="load" ns="$(arg namespace)" />
+    <!-- Include Gazebo launch file -->
+    <!-- <include file="$(find gazebo_ros)/launch/empty_world.launch"> -->
+        <!-- <arg name="world_name" default="$(arg world_name)"/> -->
+    <!-- </include> -->
 
-        <!-- Spawn the controllers -->
-        <node pkg="controller_manager" type="spawner" name="controller_spawner" ns="$(arg namespace)"
-            args="joint_state_publisher ackermann_steering_controller"
-            output="screen" respawn="false" />
+    <!-- Set use_sim_time flag -->
+    <!-- <param name="/use_sim_time" value="$(arg use_sim_time)"/> -->
 
-        <!-- Launch  the robot state publisher -->
-        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
-            <param name="publish_frequency" value="50.0"/>
-        </node>
+    <!-- Set command arguments -->
+    <arg unless="$(arg paused)" name="command_arg1" value=""/>
+    <arg     if="$(arg paused)" name="command_arg1" value="-u"/>
+    <arg unless="$(arg recording)" name="command_arg2" value=""/>
+    <arg     if="$(arg recording)" name="command_arg2" value="-r"/>
+    <arg unless="$(arg verbose)" name="command_arg3" value=""/>
+    <arg     if="$(arg verbose)" name="command_arg3" value="--verbose"/>
+    <arg unless="$(arg debug)" name="script_type" value="gzserver"/>
+    <arg     if="$(arg debug)" name="script_type" value="debug"/>
 
-        <!-- Launch a rqt steering GUI for publishing to /steer_bot/steer_drive_controller/cmd_vel -->
-        <!-- <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rqt_robot_steering" >
-            <param name="default_topic" value="$(arg namespace)/ackermann_steering_controller/cmd_vel"/>
-        </node> -->
-		
-        <node pkg="tf" type="static_transform_publisher" name="velodyne2_to_velodyne" args="0 0 0 0 0 0 velodyne2 steer_bot/velodyne2 100" />
+    <!-- Load the robot description -->
+    <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
-        <!-- Spawn robot in Gazebo -->
-        <node name="spawn_vehicle" pkg="gazebo_ros" type="spawn_model"
-            args="-urdf -param robot_description -model steer_bot
-                -gazebo_namespace /$(arg namespace)/gazebo
-                -x $(arg x) -y $(arg y) -z $(arg z)
-                -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
-            respawn="false" output="screen" />
+    <!-- Launch the robot state publisher -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <param name="publish_frequency" value="50.0"/>
+    </node>
 
-    </group>
+    <!-- Load ros_controllers configuration parameters -->
+    <rosparam file="$(find steer_bot_control)/config/ctrl_ackermann_steering_controller.yaml" command="load" ns="$(arg namespace)" />
+    <rosparam file="$(find steer_bot_control)/config/ctrl_gains.yaml" command="load" ns="$(arg namespace)" />
+    <rosparam file="$(find steer_bot_control)/config/ctrl_joint_state_publisher.yaml" command="load" ns="$(arg namespace)" />
+    <rosparam file="$(find steer_bot_control)/config/ctrl_steer_bot_hardware_gazebo.yaml" command="load" ns="$(arg namespace)" />
+
+    <!-- Spawn the controllers -->
+    <node pkg="controller_manager" type="spawner" name="controller_spawner" ns="$(arg namespace)"
+        args="joint_state_publisher ackermann_steering_controller"
+        output="screen" respawn="false" />
+
+    <node pkg="tf" type="static_transform_publisher" name="velodyne2_to_velodyne" args="0 0 0 0 0 0 velodyne2 steer_bot/velodyne2 100" />
+
+    <!-- Launch a rqt steering GUI for publishing to /steer_bot/steer_drive_controller/cmd_vel -->
+    <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rqt_robot_steering" >
+        <param name="default_topic" value="$(arg namespace)/ackermann_steering_controller/cmd_vel"/>
+    </node>
+
+<!-- 
+    <node name="spawn_vehicle" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="$(arg output)"
+      args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) -s libgazebo_ros_paths_plugin.so $(arg world_name) -urdf -param robot_description -model steer_bot -gazebo_namespace /$(arg namespace)/gazebo -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
+      required="$(arg server_required)" /> -->
+
+
+    <!-- <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="$(arg output)"
+	    args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name) -urdf -param robot_description -model steer_bot -gazebo_namespace /$(arg namespace)/gazebo -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
+      required="$(arg server_required)" />
+
+    <group if="$(arg gui)">
+      <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="$(arg output)" args="$(arg command_arg3)"
+      required="$(arg gui_required)"/>
+    </group> -->
+
+  </group>
 
 </launch>

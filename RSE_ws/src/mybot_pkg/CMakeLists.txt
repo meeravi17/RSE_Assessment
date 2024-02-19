@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(mybot_pkg)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+#add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,12 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   velodyne_description
-  velodyne_gazebo_plugins
+  # velodyne_gazebo_plugins
   realsense2_description
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -120,6 +121,8 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/velodyne_gazebo_plugins/include
+
 )
 
 ## Declare a C++ library

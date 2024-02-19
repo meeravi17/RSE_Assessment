@@ -47,20 +47,20 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="1.0 0.6 0.2" />
+        <box size="${base_length} ${base_width} ${base_height}" />
       </geometry>
       <material name="green" />
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="1.0 0.6 0.2" />
+        <box size="${base_length} ${base_width} ${base_height}" />
       </geometry>
     </collision>
     <xacro:solid_cuboid_inertial
       rpy="0 0 0" xyz="0 0 0"
       mass="${base_mass}"
-      x="1.0" y="0.6" z="0.2" />
+      x="${base_length}" y="${base_width}" z="${base_height}" />
   </link>
 
   <!-- Front steer and rear wheel joints required for ackermann_steering_controller -->

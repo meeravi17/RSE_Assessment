@@ -5,6 +5,7 @@ material House_1/Diffuse
   {
     pass
     {
+      shininess 0.5
       texture_unit
       {
         texture House_1_Diffuse.png
@@ -25,6 +26,7 @@ material House_1/Specular
   {
     pass
     {
+      shininess 0.5
       texture_unit
       {
         texture House_1_Spec.png
@@ -40,6 +42,7 @@ material House_1/Normal
   {
     pass
     {
+      shininess 0.5
       texture_unit
       {
         texture House_1_Normal.png
