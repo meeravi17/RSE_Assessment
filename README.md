@@ -1,81 +1,145 @@
-# Micropolis Robotics - Robotics Software Engineer Technical Assesment
+# Micropolis Robotics - Robotics Software Engineer Technical Assessment
 
-This is task defined project to asses the new hirings for Robotics Software Engineer
-It helps the company to evaluate the applicants knowledge and skills in the tools and frameworks used in the department.
+## Overview
 
-## Areas Covered By This Test
-- Implementation and coding skills
-- C++ and Python profcincy
-- Robot Operation Systems (ROS)
-- Robotics Fundementals
-- Autonomous Navigation Fundementals
-- GUI development
-- Software Integration
+This repository encompasses scripts and tools developed for a robot navigation system, emphasizing Simultaneous Localization and Mapping (SLAM). The navigation process is categorized into the following steps:
 
-## Guide and Tips
-- Fork the repo to your account, and reply to the email with your repo fork that contains the soloutions once you finish **(Any reply after two weeks of the email wil not be accepted!!!)**.</br>
-- Try to utilize known/open-source tools as possible.</br>
-- Edit the README.md file in your fork, and add the steps and exxplination of your solution for each milestone.
+1. **Mapping**
+2. **Offline Localization**
+3. **Navigation with Obstacle Avoidance**
+4. **GUI Development**
+5. **Odometry Source**
 
-## Project Overview
-You are given a ROS1 workspace that contains a ready to use setup for a car-like robot equibbed with a depth camera and a 3D LiDAR, placed in a virtual world within Gazebo Simulator.
-The target goal for this project, is to develop a minimal user controlled autonomous navigation functionality for the robot provided.
+## Scripts
 
-## How To Run
-- Add the models used in the world file:
-~~~bash
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:{Add your workspace path}/src/mybot_pkg/models
-~~~
+The provided bash scripts orchestrate standalone operations, incorporating `tmux` for the proper shutdown of nodes at each operational stage.
 
-- Check and install the corresponding dependencies:
+# **1. Mapping**
 
-~~~bash
-# Available in RSE_ws
-./install.sh
-~~~
+Mapping is a crucial component of the navigation algorithm in Simultaneous Localization and Mapping (SLAM). For this task, I have incorporated data from different sensors to create a comprehensive map. The sources utilized include:
+1. Camera
+2. 3D LIDAR
+3. Odometry 
 
-
-- Launch the robot inside Gazebo:
-~~~bash
-# Launch the Robot inside Gazebo World
-roslaunch mybot_pkg gazebo.launch
-~~~
-
-## Milestones
-To achieve the desired goal, we break it down to smaller     to be achieved in order based on its debendency for the the next step.
-
-
-### 1 - Preform a SLAM on the provided world
-First, you need to map the robot world so it can understand it for later operations. </br>
-Utilize your knowledge of SLAM algorithms to produce a digital map of the world.
-
-### 2 - Offline Localization
-Next, to move the robot autonomously around the map you need to localize the robot in real-time without using SLAM (offline localization).</br>
-Implement/Use a localization algorithm to localize the robot in the map, and test that your localization is working by movibg the robot manyually arround the map and validate the localization output.
-
-### 3 - Autonomous Navigation with Obstacle avoidance
-Once you have a represntation of the environment and you can localize your robot within it, you can then start the autonomous navigation of the robot.</br>
-Implement/Use an autonomous navigation algorithm to drive the robot by itself to a defined goal that can be set in the RViz GUI, while avoiding any obstacle.
-
-### 4 - External GUI Teleoperation
-To make sure a smother operation of the robot when deploying it in the field, it's better to have a user friendly remote operation capabilties.</br>
-Develop a GUI that allows use to remotly control the robot from outside a ROS environment.
-Feel free to pick whatever framework or stack you like (C++ Qt, Python, Web-based GUI, etc...).
-**NOTE:** Implement only the basic functionality (Drive, Steer).
-
-### 5 - User Defined Navigation (Open)
-Develop the previous milestone and adopt it so the user of your GUI can also perform the Navigation functionality (Sendg Waypoints/Goal, Mapping, etc...).
-
-### (Optional) - Develop an Odometry Source for the robot
-The very first required components to start working on any autonomous functionality are the position, orientation, velocity feedback of the robot.</br>
-If we ignore the Odometry feedback provided by Gazebo, based on the robot description provided and the sensor set, develop a node that produce an Odometry feedback as accurate as possible.
-
-
+Initiate mapping using the following command:
 
 ```bash
-GOOD LUCK!
+bash ~/RSE_Assessment/RSE_ws/src/scripts/standalone_navigation/mapping_scripts.bash
 ```
-￼
-Collapse
+These diverse sensor inputs are combined using `rtabmap`. The integration of these topics and sensor data is streamlined in the launch script provided under the `rtabmap_ros` directory.
 
-has context menu
+
+## 1.1 Generate Map:
+
+The resulting map, generated from the city.world environment, is stored under `steer_bot_navigation/maps`. This map serves as the basis for all navigation testing processes, ensuring consistency.
+
+
+# **2. Offline Localization:**
+
+Offline Localization has been divided into two sections, focusing on localization using Particle Filter and ICP/NDT methods.
+
+## 2.1. Particle Filter:
+In this method, a required map and scan (Laserscan) are used. The point clouds are converted to laserscan and passed as input to the Particle Filter along with odometry data. The initial confidence of the system-based localization can be set using RViz 2D Pose estimate or a UI. The live matching or localization can be visualized in `RViz`, where `/scan_percentage` is used to estimate the confidence level. To launch the Particle Filter-based localization, use the following command:
+```
+bash ~/RSE_Assessment/RSE_ws/src/scripts/MCL_offline/MCL_localization.bash
+```
+## 2.2 ICP and NDT-based Localization:
+This method utilizes the topic of the map and Laserscan to estimate the matching correspondence of the scan to the map. The process involves the conversion of the occupancy grid to the map_cloud and the laserscan topic to perform a match between the two systems. The configuration for this process can be set via `steer_bot_navigation/launch/LaserICP/icp.yaml`. Accepted configurations include `'icp'` and `'ndt'` for correspondence matching. The resulting offline localization score is published via `/localization_score`. To launch ICP and NDT-based localization, use the following command:
+
+```
+bash ~/RSE_Assessment/RSE_ws/src/scripts/offline_localization/offline_localization.bash
+```
+
+### Challenges:
+1. Limited Map Features:
+   The map has a scarcity of features, leading to higher uncertainty and causing frequent drifts in localization.
+
+2. Reliability in Smaller Environments:
+   The provided localization solution appears reliable in smaller environments with solid features. However, for extensive navigation, significant drift issues are observed.
+   
+### Drawbacks - Particle Filter:
+1. While Particle Filter aligns well with the initial environment, it exhibits substantial drift after covering a considerable distance. This characteristic makes it less suitable for scenarios requiring extensive navigation.
+   
+2. ICP and NDT:
+NDT-omp (Normal Distributions Transform - OpenMP) demonstrates better performance than ICP. However, it lacks significant convergence for a smoother and more accessible system.
+These drawbacks highlight the challenges in achieving robust and precise localization, especially in scenarios with limited map features and extensive navigation requirements. Further improvements or alternative methods may be necessary to enhance localization reliability.
+
+# **3. Navigation with Obstacle Avoidance**
+
+For the primary navigation task, AMCL and move-base were employed. However, various planners, such as SBPL and pose follower, were explored. Despite these efforts, navigation presented complexities, including frequent drift and continuous loss of position.
+
+To launch the navigation process, use the following command:
+
+```
+bash ~/RSE_Assessment/RSE_ws/src/scripts/standalone_navigation/localization_nd_navigation.bash
+```
+This script initiates both localization and navigation, allowing the experience of obstacle avoidance in the navigation environment created earlier.
+
+
+### 3.1. Drawbacks:
+- Unreliable Navigation:
+   Navigation proves unreliable due to a scarcity of features, leading to frequent disorientation, and the robot often loses its localization.
+
+
+## 3.2. Solution - Lane Navigation:
+To address the challenges mentioned above, the following solutions are proposed:
+
+-  **Enhance Map Features:**
+   Improve navigation reliability by adding additional features to the map. However, challenges may arise in parts of the map with minimal features, making navigation challenging.
+
+-  **Incorporate Machine Vision:**
+   Utilize machine vision to enhance navigation effectiveness. A proof of concept solution involves the implementation of a lane detection module. Lanes are considered solid features that can enhance navigation for the given world sceario. However, frequent odometry drifts may occur, and this can be addressed through fusion techniques.
+
+To launch the lane navigation module, use the following command:
+
+```
+bash ~/RSE_Assessment/RSE_ws/src/scripts/LaneDetection/lane_detection.bash
+```
+## 3.3 Lane Navigation System Enhancement
+
+- The following represents a proof-of-concept approach aimed at significantly enhancing the reliability and coverage of navigation across larger areas, surpassing the capabilities of previous navigation techniques. However, specific aspects, such as the lane detection method, require further refinements for optimal performance.
+
+1. Lane Detection Improvements:
+    1. Local Costmap Generation:
+    2. Adaptive control
+    3. Incorporate robout detection datasets specifically covers T junction lanes and further sign detection module
+
+
+# **4. Web Development for Navigation functionality**
+
+The web GUI is a standalone interface accessible through 127.0.0.1:5000.
+
+To launch the web GUI, use the following command:
+```
+bash ~/RSE_Assessment/RSE_ws/src/scripts/web_gui/startup_scripts.bash
+```
+
+Once initiated, the web interface offers various options, empowering users to:
+
+### **4.1 Perform Mapping:** 
+- *Start and Stop Mapping:*
+  - Utilize features for mapping purposes.
+- *Save Map:*
+  - Save the generated map for future use.
+- *Delete Map:*
+  - Remove unwanted maps from the system.
+
+### **4.2 Set Goals:**
+- Initialization:
+  - Initialize the robotic system for goal setting.
+- Set Goals:
+  - Define specific destinations for the robotic system.
+- Remote Joystick for Teleop:
+  - Enable remote joystick control for teleoperation.
+  
+Explore the user-friendly functionalities provided by the GUI, streamlining the management and control of various aspects of the robotic navigation system.
+
+# **5. Odometry Feedback**
+
+The Odometry Feedback Controller can be launched using the following command:
+
+```
+bash ~/RSE_Assessment/RSE_ws/src/scripts/Odometry_publisher/odometry_publisher.bash
+```
+
+This controller utilizes the configuration of wheel base parameters and subscribes to the `/steer_bot/ackermann_steering_control/cmd_vel` topic to generate and publish odometry information. Depending on the calibration of the wheel base, these parameters can be updated to ensure accurate odometry readings. The resulting odometry data is published to the `/steer_bot/ackermann_steering_control/odom` topic, aligning with the structure defined in the Gazebo URDF
