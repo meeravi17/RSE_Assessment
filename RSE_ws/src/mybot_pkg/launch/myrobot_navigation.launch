@@ -4,14 +4,12 @@
     <arg name="world_name" default="$(find mybot_pkg)/worlds/city.world" />
     <arg name="cmd_timeout" default="0.5"/>
     <arg name="x" default="-20.0"/>
-    <arg name="y" default="0.0"/>
+    <arg name="y" default="0.2"/>
     <arg name="z" default="1.0" />
     <arg name="roll" default="0.0"/>
     <arg name="pitch" default="0.0"/>
     <arg name="yaw" default="0.0"/>
     <arg name="namespace" default="/steer_bot" />
-    <param name="/use_sim_time" value="true"/>
-
 
 
     <group ns="$(arg namespace)">
