@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="steer_bot_navigation" type="steer_bot_odometry" name="steer_bot_odometry_node" output="screen">
+		<rosparam file="$(find steer_bot_navigation)/launch/odometry_ackermann/odom_config.yaml" command="load"/>
+  </node>
+</launch>

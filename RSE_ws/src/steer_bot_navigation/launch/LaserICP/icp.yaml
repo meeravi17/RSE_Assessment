@@ -1,0 +1,10 @@
+icp_localization:
+  initial_pose:
+    x: -20.0 
+    y: 0.0 
+    z: 0.0 
+    roll: 0.0   
+    pitch: 0.0 
+    yaw: 0.0 
+global_frame_id: "map"
+odom_topic: "/steer_bot/ackermann_steering_controller/odom"
