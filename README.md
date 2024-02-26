@@ -167,3 +167,7 @@ This controller utilizes the configuration of wheel base parameters and subscrib
 
 3. **navigation-experimental** -- SBPL lattice planner and pose follower
     - [Navigation-Experimental ](https://github.com/ros-planning/navigation_experimental)
+4. **tmux** -- remote terminal sessions
+    ```
+    sudo apt-get install tmux
+    ```
