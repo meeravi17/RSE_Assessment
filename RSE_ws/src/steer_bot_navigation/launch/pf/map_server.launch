@@ -1,0 +1,4 @@
+<launch>
+    <arg name="map" default="$(find steer_bot_navigation)/maps/map_city.yaml"/>
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map)" />
+</launch>
