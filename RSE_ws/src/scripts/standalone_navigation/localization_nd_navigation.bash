@@ -22,7 +22,7 @@ tmux send-keys -t 'laserscanconvert' 'roslaunch pointcloud_to_laserscan pointclo
 
 sleep 1
 tmux new-window -t $session -n 'navigation'
-tmux send-keys -t 'navigation' 'source ' 'source ~/RSE_Assessment/RSE_ws/devel/setup.bash' C-m
+tmux send-keys -t 'navigation' 'source ~/RSE_Assessment/RSE_ws/devel/setup.bash' C-m
 tmux send-keys -t 'navigation' 'roslaunch steer_bot_navigation loc_and_mapping.launch map_file:="$(pwd)"/static/'"$1"'.yaml' C-m
 
 tmux new-window -t $session -n 'remapper'
