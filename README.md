@@ -43,6 +43,8 @@ In this method, a required map and scan (Laserscan) are used. The point clouds a
 ```
 bash ~/RSE_Assessment/RSE_ws/src/scripts/MCL_offline/MCL_localization.bash
 ```
+![Pf Localization](RSE_ws/images/particle_filter.png)
+
 ## 2.2 ICP and NDT-based Localization:
 This method utilizes the topic of the map and Laserscan to estimate the matching correspondence of the scan to the map. The process involves the conversion of the occupancy grid to the map_cloud and the laserscan topic to perform a match between the two systems. The configuration for this process can be set via `steer_bot_navigation/launch/LaserICP/icp.yaml`. Accepted configurations include `'icp'` and `'ndt'` for correspondence matching. The resulting offline localization score is published via `/localization_score`. To launch ICP and NDT-based localization, use the following command:
 
@@ -82,7 +84,11 @@ This script initiates both localization and navigation, allowing the experience 
 
 
 ## 3.2. Solution - Lane Navigation:
-To address the challenges mentioned above, the following solutions are proposed:
+To address the challenges mentioned above, the following solutions are proposed: 
+
+Lane detection and navigation test image
+
+![Lane detection](RSE_ws/images/lanedetect.png)
 
 -  **Enhance Map Features:**
    Improve navigation reliability by adding additional features to the map. However, challenges may arise in parts of the map with minimal features, making navigation challenging.
@@ -143,3 +149,21 @@ bash ~/RSE_Assessment/RSE_ws/src/scripts/Odometry_publisher/odometry_publisher.b
 ```
 
 This controller utilizes the configuration of wheel base parameters and subscribes to the `/steer_bot/ackermann_steering_control/cmd_vel` topic to generate and publish odometry information. Depending on the calibration of the wheel base, these parameters can be updated to ensure accurate odometry readings. The resulting odometry data is published to the `/steer_bot/ackermann_steering_control/odom` topic, aligning with the structure defined in the Gazebo URDF
+
+
+# **6. Dependencies:**
+
+1. **RangeLibc** - Required for Particle Filter Installation
+   - [RangeLibc GitHub Repository](https://github.com/kctess5/range_libc)
+   ```
+   git clone http://github.com/kctess5/range_libc
+   cd range_libc/pywrappers
+   python3 setup.py 
+   ```
+
+
+2.  **rtabmap_ros** -- Mapping and Localization
+    - [RangeLibc GitHub Repository](https://github.com/introlab/rtabmap_ros)
+
+3. **navigation-experimental** -- SBPL lattice planner and pose follower
+    - [Navigation-Experimental ](https://github.com/ros-planning/navigation_experimental)
